@@ -1,9 +1,12 @@
 "use client";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { signup } from "../actions/auth";
 
 const SignupForm = () => {
   const [state, action, pending] = useActionState(signup, undefined);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   return (
     <form action={action} className=" flex flex-col gap-4 w-[30rem]">
@@ -13,6 +16,8 @@ const SignupForm = () => {
           id="name"
           name="name"
           type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="w-full py-2 border rounded-lg px-4"
           placeholder="Enter your name"
         />
@@ -26,6 +31,8 @@ const SignupForm = () => {
           id="email"
           name="email"
           type="text"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full border py-2 rounded-lg px-4"
           placeholder="yourname@domain.com"
         />
@@ -39,6 +46,8 @@ const SignupForm = () => {
           id="password"
           name="password"
           type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full border py-2 rounded-lg px-4"
           placeholder="your password"
         />

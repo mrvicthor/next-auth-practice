@@ -60,7 +60,6 @@ export async function verifyEmail(code: string) {
   const validCode = await VerificationTokenModel.findOne({
     _id: code,
   });
-  console.log("valid code", validCode);
 
   if (!validCode) {
     return {
@@ -68,7 +67,7 @@ export async function verifyEmail(code: string) {
     };
   }
 
-  await UserModel.findByIdAndUpdate(
+  const user = await UserModel.findByIdAndUpdate(
     validCode.userId,
     {
       isVerified: true,
@@ -76,4 +75,6 @@ export async function verifyEmail(code: string) {
     { new: true }
   );
   await validCode.deleteOne();
+
+  return { user };
 }
