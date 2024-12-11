@@ -1,9 +1,12 @@
 import { getUser } from "@/app/lib/dal";
+
 import Link from "next/link";
 import React from "react";
+import LogoutButton from "./LogoutButton";
 
 const Header = async () => {
   const user = await getUser();
+
   return (
     <header className="h-[70px]">
       <nav
@@ -13,9 +16,7 @@ const Header = async () => {
         <Link href="/">auth practice</Link>
         <div>
           {user?.name ? (
-            <button className="border border-black font-bold py-2 px-4 rounded-3xl hover:bg-black hover:text-white">
-              logout
-            </button>
+            <LogoutButton />
           ) : (
             <Link
               href="/login"

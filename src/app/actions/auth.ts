@@ -9,7 +9,7 @@ import {
 } from "../lib/definitions";
 import { UserModel, VerificationTokenModel } from "../lib/schema";
 import { sendVerificationEmail } from "../config/sendMail";
-import { createSession } from "./session";
+import { createSession, deleteSession } from "./session";
 import connectToDatabase from "../mongo/db";
 
 const APP_ORIGIN = "http://localhost:3000";
@@ -117,4 +117,8 @@ export async function login(state: LoginFormState, formData: FormData) {
 
   await createSession(user._id);
   redirect("/");
+}
+
+export async function logout() {
+  await deleteSession();
 }
