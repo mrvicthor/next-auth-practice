@@ -1,7 +1,12 @@
 "use server";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { SignupFormSchema, FormState } from "../lib/definitions";
+import {
+  SignupFormSchema,
+  FormState,
+  LoginFormState,
+  LoginFormSchema,
+} from "../lib/definitions";
 import { UserModel, VerificationTokenModel } from "../lib/schema";
 import { sendVerificationEmail } from "../config/sendMail";
 import { createSession } from "./session";
@@ -79,4 +84,37 @@ export async function verifyEmail(code: string) {
   return { user };
 }
 
-export async function login(state: FormState, formData: FormData) {}
+export async function login(state: LoginFormState, formData: FormData) {
+  await connectToDatabase();
+
+  const validatedFields = LoginFormSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const { email, password } = validatedFields.data;
+
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    return {
+      message: "Invalid credentials",
+    };
+  }
+
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword) {
+    return {
+      message: "Invalid credentials",
+    };
+  }
+
+  await createSession(user._id);
+  redirect("/");
+}

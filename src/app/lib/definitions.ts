@@ -18,7 +18,10 @@ export const SignupFormSchema = z.object({
     .trim(),
 });
 
-export const;
+export const LoginFormSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email." }).trim(),
+  password: z.string().min(8, { message: "Password can not be empty" }).trim(),
+});
 
 export type FormState =
   | {
@@ -36,10 +39,12 @@ export type SessionPayload = {
   expiresAt: Date;
 };
 
-export type LoginFormState = {
-  errors?: {
-    email?: string[];
-    password?: string[];
-  };
-  message?: string;
-};
+export type LoginFormState =
+  | {
+      errors?: {
+        email?: string[];
+        password?: string[];
+      };
+      message?: string;
+    }
+  | undefined;

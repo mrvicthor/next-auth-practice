@@ -4,7 +4,6 @@ import React from "react";
 
 const Header = async () => {
   const user = await getUser();
-  console.log(user);
   return (
     <header className="h-[70px]">
       <nav

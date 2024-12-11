@@ -1,9 +1,9 @@
 "use client";
 import { useActionState, useState } from "react";
-import { signup } from "../actions/auth";
+import { login } from "../actions/auth";
 
 const LoginForm = () => {
-  const [state, action, pending] = useActionState(signup, undefined);
+  const [state, action, pending] = useActionState(login, undefined);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
