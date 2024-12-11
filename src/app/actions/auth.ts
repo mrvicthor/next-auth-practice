@@ -78,3 +78,5 @@ export async function verifyEmail(code: string) {
 
   return { user };
 }
+
+export async function login(state: FormState, formData: FormData) {}

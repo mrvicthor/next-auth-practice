@@ -18,6 +18,8 @@ export const SignupFormSchema = z.object({
     .trim(),
 });
 
+export const;
+
 export type FormState =
   | {
       errors?: {
@@ -32,4 +34,12 @@ export type FormState =
 export type SessionPayload = {
   userId: mongoose.Types.ObjectId;
   expiresAt: Date;
+};
+
+export type LoginFormState = {
+  errors?: {
+    email?: string[];
+    password?: string[];
+  };
+  message?: string;
 };
