@@ -17,7 +17,6 @@ export async function verifySession() {
 }
 
 export const getUser = cache(async () => {
-  console.log("trigger");
   const session = await verifySession();
   if (!session) return null;
 
