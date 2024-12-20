@@ -23,6 +23,24 @@ export const LoginFormSchema = z.object({
   password: z.string().min(8, { message: "Password can not be empty" }).trim(),
 });
 
+export const ForgotPasswordFormSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email" }).trim(),
+});
+
+export const ResetPasswordFormSchema = z.object({
+  password: z
+    .string()
+    .min(8, { message: "Be at least 8 characters long" })
+    .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+    .regex(/[0-9]/, { message: "Contain at least one number." })
+    .regex(/[^a-zA-Z0-9]/, {
+      message: "Contain at least one special character.",
+    })
+    .trim(),
+
+  token: z.string().trim(),
+});
+
 export type FormState =
   | {
       errors?: {
@@ -48,3 +66,24 @@ export type LoginFormState =
       message?: string;
     }
   | undefined;
+
+export type PassWordResetState =
+  | {
+      errors?: {
+        email?: string[];
+      };
+      message?: string;
+    }
+  | undefined;
+
+export interface ResetPasswordFormData {
+  password: string;
+  token: string;
+}
+export type ResetPasswordActionResponse = {
+  success: boolean;
+  message: string;
+  errors?: {
+    [K in keyof ResetPasswordFormData]?: string[];
+  };
+};

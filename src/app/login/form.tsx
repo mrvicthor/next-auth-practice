@@ -1,6 +1,7 @@
 "use client";
 import { useActionState, useState } from "react";
 import { login } from "../actions/auth";
+import Link from "next/link";
 
 const LoginForm = () => {
   const [state, action, pending] = useActionState(login, undefined);
@@ -38,6 +39,11 @@ const LoginForm = () => {
       </div>
 
       {state?.errors?.password && <p>{state.errors.password}</p>}
+      <div className="flex justify-end">
+        <Link href="/forgot-password" className="capitalize">
+          forgot password?
+        </Link>
+      </div>
       <button
         type="submit"
         disabled={pending}

@@ -6,9 +6,17 @@ import {
   FormState,
   LoginFormState,
   LoginFormSchema,
+  PassWordResetState,
+  ResetPasswordFormSchema,
+  ResetPasswordFormData,
+  ForgotPasswordFormSchema,
+  ResetPasswordActionResponse,
 } from "../lib/definitions";
-import { UserModel, VerificationTokenModel } from "../lib/schema";
-import { sendVerificationEmail } from "../config/sendMail";
+import { SessionModel, UserModel, VerificationTokenModel } from "../lib/schema";
+import {
+  handlePasswordResetEmail,
+  sendVerificationEmail,
+} from "../config/sendMail";
 import { createSession, deleteSession } from "./session";
 import connectToDatabase from "../mongo/db";
 
@@ -31,7 +39,7 @@ export async function signup(state: FormState, formData: FormData) {
   }
 
   const { email, password, name } = validatedFields.data;
-  //   Call db to create a user
+  //   check if user exist
   const existingUser = await UserModel.exists({ email });
 
   if (existingUser) {
@@ -116,9 +124,128 @@ export async function login(state: LoginFormState, formData: FormData) {
   }
 
   await createSession(user._id);
-  redirect("/");
+
+  redirect("/dashboard");
 }
 
 export async function logout() {
   await deleteSession();
+}
+
+export async function sendPasswordResetEmail(
+  state: PassWordResetState,
+  formData: FormData
+) {
+  // connect to DB
+  await connectToDatabase();
+
+  // validate field
+  const validatedField = ForgotPasswordFormSchema.safeParse({
+    email: formData.get("email"),
+  });
+
+  //   If email is invalid, return early
+  if (!validatedField.success) {
+    return {
+      errors: validatedField.error.flatten().fieldErrors,
+    };
+  }
+
+  const { email } = validatedField.data;
+
+  // check if user exist
+  const user = await UserModel.findOne({ email });
+
+  if (!user) {
+    return {
+      message: "User not found",
+    };
+  }
+
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+  const count = await VerificationTokenModel.countDocuments({
+    userId: user._id,
+    type: "reset_password",
+    expiresAt: { $gt: fiveMinutesAgo },
+  });
+
+  console.log(count, "count");
+
+  // if (count <= 1) {
+  //   return {
+  //     message: "Too many reset requests, please try again later",
+  //   };
+  // }
+
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+  const verificationToken = await VerificationTokenModel.create({
+    userId: user._id,
+    type: "reset_password",
+    expiresAt,
+  });
+
+  const url = `${APP_ORIGIN}/reset-password?code=${
+    verificationToken._id
+  }&exp=${expiresAt.getTime()}`;
+
+  await handlePasswordResetEmail(user.email, url);
+
+  return {
+    message: "Password reset link sent to your email",
+  };
+}
+
+export async function resetPassword(
+  state: ResetPasswordActionResponse | null,
+  formData: FormData
+) {
+  await connectToDatabase();
+
+  const rawData: ResetPasswordFormData = {
+    password: formData.get("password") as string,
+    token: formData.get("token") as string,
+  };
+
+  const validatedFields = ResetPasswordFormSchema.safeParse(rawData);
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      message: "Please fix errors in the form",
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+  const { password, token } = validatedFields.data;
+
+  const validCode = await VerificationTokenModel.findOne({
+    _id: token,
+    type: "reset_password",
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (!validCode) {
+    return {
+      success: false,
+      message: "Invalid token or token expired",
+    };
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const updatedUser = await UserModel.findOneAndUpdate(validCode.userId, {
+    password: hashedPassword,
+  });
+
+  await validCode.deleteOne();
+
+  await SessionModel.deleteMany({
+    userId: updatedUser._id,
+  });
+
+  return {
+    success: true,
+    message: "Password reset successful",
+  };
 }
