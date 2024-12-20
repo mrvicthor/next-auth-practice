@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { sendPasswordResetEmail } from "../actions/auth";
+import Link from "next/link";
 
 export default function Page() {
   const [state, action, pending] = useActionState(
@@ -11,6 +12,7 @@ export default function Page() {
   const [email, setEmail] = useState("");
   return (
     <div className="flex flex-col items-center justify-center mt-12 gap-6">
+      <h1 className="font-bold text-xl">Reset your password</h1>
       <form
         action={action}
         className=" flex flex-col gap-4 w-[30rem]"
@@ -38,8 +40,19 @@ export default function Page() {
           className="bg-black text-white py-2 rounded-lg"
         >
           {" "}
-          {pending ? "Submitting..." : "Submit"}
+          {pending ? "Submitting..." : "Reset Password"}
         </button>
+
+        <p>
+          Go back to{" "}
+          <Link href="/login" className="text-blue-400">
+            Login
+          </Link>{" "}
+          or{" "}
+          <Link href="/signup" className="text-blue-400">
+            Signup
+          </Link>
+        </p>
       </form>
     </div>
   );

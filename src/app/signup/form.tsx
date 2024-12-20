@@ -1,12 +1,15 @@
 "use client";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { signup } from "../actions/auth";
+import { SignupActionResponse } from "../lib/definitions";
+
+const initialState: SignupActionResponse = {
+  success: false,
+  message: "",
+};
 
 const SignupForm = () => {
-  const [state, action, pending] = useActionState(signup, undefined);
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [state, action, pending] = useActionState(signup, initialState);
 
   return (
     <form action={action} className=" flex flex-col gap-4 w-[30rem]">
@@ -16,8 +19,7 @@ const SignupForm = () => {
           id="name"
           name="name"
           type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          defaultValue={state?.inputs?.name}
           className="w-full py-2 border rounded-lg px-4"
           placeholder="Enter your name"
         />
@@ -31,8 +33,7 @@ const SignupForm = () => {
           id="email"
           name="email"
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={state.inputs?.email}
           className="w-full border py-2 rounded-lg px-4"
           placeholder="yourname@domain.com"
         />
@@ -46,8 +47,7 @@ const SignupForm = () => {
           id="password"
           name="password"
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={state.inputs?.password}
           className="w-full border py-2 rounded-lg px-4"
           placeholder="your password"
         />
@@ -61,6 +61,21 @@ const SignupForm = () => {
               <li key={index}>{item}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {state?.message && (
+        <div
+          className={`${
+            state.success ? "border-green-500" : "border-red-500"
+          } border py-3 px-4 rounded-lg `}
+        >
+          {state.success && (
+            <span className="material-symbols-outlined text-green-500 flex">
+              check_circle
+            </span>
+          )}
+          <p>{state.message}</p>
         </div>
       )}
       <button

@@ -48,8 +48,9 @@ export interface SignupFormData {
 }
 
 export type SignupActionResponse = {
-  sucess: boolean;
+  success: boolean;
   message: string;
+  inputs?: SignupFormData;
   errors?: {
     [K in keyof SignupFormData]?: string[];
   };

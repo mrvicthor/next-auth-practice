@@ -43,6 +43,7 @@ export async function signup(
       success: false,
       message: "Please fix errors in the form",
       errors: validatedFields.error.flatten().fieldErrors,
+      inputs: rawData,
     };
   }
 
@@ -52,6 +53,7 @@ export async function signup(
 
   if (existingUser) {
     return {
+      success: false,
       message: "User already exist.",
     };
   }
@@ -74,7 +76,11 @@ export async function signup(
   //   send verification email
   await sendVerificationEmail(user.email, url);
   await createSession(userId);
-  redirect("/");
+  // redirect("/");
+  return {
+    success: true,
+    message: "Signup successful. Check email for verification",
+  };
 }
 
 export async function verifyEmail(code: string) {
