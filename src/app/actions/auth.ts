@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import {
   SignupFormSchema,
-  FormState,
   LoginFormState,
   LoginFormSchema,
   PassWordResetState,
@@ -11,6 +10,8 @@ import {
   ResetPasswordFormData,
   ForgotPasswordFormSchema,
   ResetPasswordActionResponse,
+  SignupActionResponse,
+  SignupFormData,
 } from "../lib/definitions";
 import { SessionModel, UserModel, VerificationTokenModel } from "../lib/schema";
 import {
@@ -21,19 +22,26 @@ import { createSession, deleteSession } from "./session";
 import connectToDatabase from "../mongo/db";
 
 const APP_ORIGIN = "http://localhost:3000";
-export async function signup(state: FormState, formData: FormData) {
+export async function signup(
+  state: SignupActionResponse | null,
+  formData: FormData
+) {
   // connect db
   await connectToDatabase();
+
+  const rawData: SignupFormData = {
+    name: formData.get("name") as string,
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
   // Validate form fields
-  const validatedFields = SignupFormSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+  const validatedFields = SignupFormSchema.safeParse(rawData);
 
   //   If any form fields are invalid, return early
   if (!validatedFields.success) {
     return {
+      success: false,
+      message: "Please fix errors in the form",
       errors: validatedFields.error.flatten().fieldErrors,
     };
   }
@@ -200,7 +208,7 @@ export async function sendPasswordResetEmail(
 export async function resetPassword(
   state: ResetPasswordActionResponse | null,
   formData: FormData
-) {
+): Promise<ResetPasswordActionResponse> {
   await connectToDatabase();
 
   const rawData: ResetPasswordFormData = {

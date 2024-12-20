@@ -41,6 +41,20 @@ export const ResetPasswordFormSchema = z.object({
   token: z.string().trim(),
 });
 
+export interface SignupFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export type SignupActionResponse = {
+  sucess: boolean;
+  message: string;
+  errors?: {
+    [K in keyof SignupFormData]?: string[];
+  };
+};
+
 export type FormState =
   | {
       errors?: {
