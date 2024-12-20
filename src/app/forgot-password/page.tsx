@@ -1,18 +1,38 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { sendPasswordResetEmail } from "../actions/auth";
 import Link from "next/link";
+import { ForgotPasswordActionResponse } from "../lib/definitions";
 
+const initialState: ForgotPasswordActionResponse = {
+  success: false,
+  message: "",
+};
 export default function Page() {
   const [state, action, pending] = useActionState(
     sendPasswordResetEmail,
-    undefined
+    initialState
   );
-  const [email, setEmail] = useState("");
+
   return (
     <div className="flex flex-col items-center justify-center mt-12 gap-6">
       <h1 className="font-bold text-xl">Reset your password</h1>
+      {state?.message && (
+        <div
+          className={`${
+            state.success ? "border-green-500" : "border-red-500"
+          } border py-3 px-4 rounded-lg `}
+        >
+          {state.success && (
+            <span className="material-symbols-outlined text-green-500 flex">
+              check_circle
+            </span>
+          )}
+          <p>{state.message}</p>
+        </div>
+      )}
+
       <form
         action={action}
         className=" flex flex-col gap-4 w-[30rem]"
@@ -24,8 +44,7 @@ export default function Page() {
             id="email"
             name="email"
             type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            defaultValue={state.inputs?.email}
             className="w-full border py-2 rounded-lg px-4"
             placeholder="yourname@domain.com"
             required

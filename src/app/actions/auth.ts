@@ -5,13 +5,14 @@ import {
   SignupFormSchema,
   LoginFormState,
   LoginFormSchema,
-  PassWordResetState,
   ResetPasswordFormSchema,
   ResetPasswordFormData,
   ForgotPasswordFormSchema,
   ResetPasswordActionResponse,
   SignupActionResponse,
   SignupFormData,
+  ForgotPasswordActionResponse,
+  ForgotPasswordFormData,
 } from "../lib/definitions";
 import { SessionModel, UserModel, VerificationTokenModel } from "../lib/schema";
 import {
@@ -147,21 +148,25 @@ export async function logout() {
 }
 
 export async function sendPasswordResetEmail(
-  state: PassWordResetState,
+  state: ForgotPasswordActionResponse | null,
   formData: FormData
 ) {
   // connect to DB
   await connectToDatabase();
 
+  const rawData: ForgotPasswordFormData = {
+    email: formData.get("email") as string,
+  };
   // validate field
-  const validatedField = ForgotPasswordFormSchema.safeParse({
-    email: formData.get("email"),
-  });
+  const validatedField = ForgotPasswordFormSchema.safeParse(rawData);
 
   //   If email is invalid, return early
   if (!validatedField.success) {
     return {
+      success: false,
+      message: "Please fix errors in the form",
       errors: validatedField.error.flatten().fieldErrors,
+      inputs: rawData,
     };
   }
 
@@ -172,6 +177,7 @@ export async function sendPasswordResetEmail(
 
   if (!user) {
     return {
+      success: false,
       message: "User not found",
     };
   }
@@ -207,6 +213,7 @@ export async function sendPasswordResetEmail(
   await handlePasswordResetEmail(user.email, url);
 
   return {
+    success: true,
     message: "Password reset link sent to your email",
   };
 }

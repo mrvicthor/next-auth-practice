@@ -56,17 +56,6 @@ export type SignupActionResponse = {
   };
 };
 
-export type FormState =
-  | {
-      errors?: {
-        name?: string[];
-        email?: string[];
-        password?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
-
 export type SessionPayload = {
   userId: mongoose.Types.ObjectId;
   expiresAt: Date;
@@ -91,6 +80,18 @@ export type PassWordResetState =
     }
   | undefined;
 
+export interface ForgotPasswordFormData {
+  email: string;
+}
+
+export type ForgotPasswordActionResponse = {
+  success: boolean;
+  message: string;
+  inputs?: ForgotPasswordFormData;
+  errors?: {
+    [K in keyof ForgotPasswordFormData]?: string[];
+  };
+};
 export interface ResetPasswordFormData {
   password: string;
   token: string;
