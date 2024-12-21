@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import {
   SignupFormSchema,
-  LoginFormState,
   LoginFormSchema,
   ResetPasswordFormSchema,
   ResetPasswordFormData,
@@ -13,6 +12,8 @@ import {
   SignupFormData,
   ForgotPasswordActionResponse,
   ForgotPasswordFormData,
+  LoginActionResponse,
+  LoginFormData,
 } from "../lib/definitions";
 import { SessionModel, UserModel, VerificationTokenModel } from "../lib/schema";
 import {
@@ -107,17 +108,24 @@ export async function verifyEmail(code: string) {
   return { user };
 }
 
-export async function login(state: LoginFormState, formData: FormData) {
+export async function login(
+  state: LoginActionResponse | null,
+  formData: FormData
+) {
   await connectToDatabase();
 
-  const validatedFields = LoginFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
+  const rawData: LoginFormData = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+  const validatedFields = LoginFormSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
     return {
+      success: false,
+      message: "Please fix errors in the form",
       errors: validatedFields.error.flatten().fieldErrors,
+      inputs: rawData,
     };
   }
 
@@ -126,6 +134,7 @@ export async function login(state: LoginFormState, formData: FormData) {
   const user = await UserModel.findOne({ email });
   if (!user) {
     return {
+      success: false,
       message: "Invalid credentials",
     };
   }
@@ -134,6 +143,7 @@ export async function login(state: LoginFormState, formData: FormData) {
 
   if (!isValidPassword) {
     return {
+      success: false,
       message: "Invalid credentials",
     };
   }
@@ -265,8 +275,5 @@ export async function resetPassword(
     userId: updatedUser._id,
   });
 
-  return {
-    success: true,
-    message: "Password reset successful",
-  };
+  redirect("/login");
 }

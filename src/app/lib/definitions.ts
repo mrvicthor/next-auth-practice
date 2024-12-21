@@ -61,15 +61,19 @@ export type SessionPayload = {
   expiresAt: Date;
 };
 
-export type LoginFormState =
-  | {
-      errors?: {
-        email?: string[];
-        password?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
+export type LoginFormData = {
+  email: string;
+  password: string;
+};
+
+export type LoginActionResponse = {
+  success: boolean;
+  message: string;
+  inputs?: LoginFormData;
+  errors?: {
+    [K in keyof LoginFormData]?: string[];
+  };
+};
 
 export type PassWordResetState =
   | {

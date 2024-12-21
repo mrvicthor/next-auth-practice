@@ -127,11 +127,11 @@ export const PASSWORD_RESET_TEMPLATE = `
             <p>If the button above doesn't work, copy and paste this link into your browser:</p>
             <p>{Reset_Password_Link}</p>
             <p>For security reasons, this link can only be used once. If you need to reset your password again, please request a new link.</p>
-            <p>Best regards,<br>The [Company_Name] Team</p>
+            <p>Best regards,<br>The Black Bear Team</p>
         </div>
         <div class="footer">
             <p>This email was sent to [User_Email]. If you believe this was a mistake, please contact our support team.</p>
-            <p>&copy; new Date.now().getFullYear() Black Bear. All rights reserved.</p>
+            <p>&copy; 2024 Black Bear. All rights reserved.</p>
         </div>
     </div>
 </body>
